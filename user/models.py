@@ -49,6 +49,16 @@ class User(AbstractUser):
         """
         kwargs_copy = kwargs.copy()
 
+        # Copia de los datos del objeto para rollback
+        backup_data = {
+            'id': self.id,
+            'username': self.username,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'password': self.password,
+        }
+
         try:
             # Eliminar en Postgres
             kwargs_copy['using'] = 'default'
@@ -59,10 +69,10 @@ class User(AbstractUser):
             super(User, self).delete(*args, **kwargs_copy)
 
         except Exception as e:
-            # Rollback: reinsertar en Postgres si no se logró borrar en MySQL
+            # Rollback en Postgres: reinsertar el usuario
             try:
                 kwargs_copy['using'] = 'default'
-                super(User, self).save(*args, **kwargs_copy)
+                User.objects.using('default').create(**backup_data)
             except Exception as rollback_error:
                 print("Error al hacer rollback en Postgres:", rollback_error)
 

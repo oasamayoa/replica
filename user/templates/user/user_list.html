@@ -1,0 +1,330 @@
+{% extends 'base/home.html' %}
+
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">BD PostgresSQL</h3>
+                        <div class="card-tools">
+                            <button class="btn btn-success btn-flat btnaddson" type="button">
+                                <i class="far fa-address-card nav-icon"> </i> Agregar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="tablaPost" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>nombre</th>
+                                    <th>apellido</th>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>id</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">BD MySQL</h3>
+                    </div>
+                    <div class="card-body">
+                        <table id="tablaMysql" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>nombre</th>
+                                    <th>apellido</th>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>id</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal editar -->
+<div class="modal fade" id="modaleadd" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <form id="frmAdd" method="post" enctype="multipart/form-data">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <b><i class=""></i>Agregar usuario</b>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="text" name="action" id="action" hidden>
+                    <input type="text" name="id" id="id" hidden>
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <label>Nombre</label>
+                            <input type="text" name="first_name" id="first_name" class="form-control" required
+                                placeholder="Leonel Cristiano...">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Apellido</label>
+                            <input type="text" name="last_name" id="last_name" class="form-control" required
+                                placeholder="Duda Kunde...">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Usuario</label>
+                            <input type="text" name="username" id="username" class="form-control" required
+                                placeholder="lacabra">
+                        </div>
+
+                        <div class="col-6 mb-2">
+                            <label>Email</label>
+                            <input type="email" name="email" id="email" class="form-control" required
+                                placeholder="cr7@gmail.com">
+                        </div>
+
+                        <div class="col-6 mb-2">
+                            <label>Contraseña</label>
+                            <input type="password" name="password" id="password" class="form-control"
+                                placeholder="Az19@.">
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+
+    $(function () {
+
+        // submit único, siempre activo
+        $('#frmAdd').on('submit', function (e) {
+            e.preventDefault();
+
+            const parameters = new FormData(this);
+
+            $.ajax({
+                url: window.location.pathname,
+                type: 'POST',
+                data: parameters,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: function (data) {
+                    if (data.error) {
+                        toastr.error(data.error);
+                        return false;
+                    } else {
+                        $('#modaleadd').modal('hide');
+                        $('#tablaMysql').DataTable().ajax.reload(null, false);
+                        $('#tablaPost').DataTable().ajax.reload(null, false);
+                        toastr.success('Acción realizada correctamente.');
+                    }
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            });
+        });
+
+
+        // Botón para agregar
+        $('.btnaddson').on('click', function () {
+            $('#action').val('add');
+            $('#frmAdd')[0].reset();
+            $('#modaleadd').modal('show');
+        });
+
+    });
+
+    function actulizarTabla() {
+
+        const tablaPost = $('#tablaPost').DataTable({
+            responsive: true,
+            autoWidth: false,
+            destroy: true,
+            deferRender: true,
+            ajax: {
+                url: window.location.pathname,
+                type: 'POST',
+                data: {
+                    'action': 'list_postgres',
+
+
+                },
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                dataSrc: ""
+            },
+            language: {
+                url: endPointTablaEspañol,
+            },
+            dom: 'Bfrtip',
+            columns: [{
+                "data": "first_name"
+            },
+            {
+                "data": "last_name"
+            },
+            {
+                "data": "username"
+            },
+            {
+                "data": "email"
+            },
+            {
+                "data": "id"
+            },
+
+            ],
+            columnDefs: [
+                {
+                    targets: [-1],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        var buttons = '';
+                        buttons += '<a type="button" rel="edit" class="btn btn-warning btn-xs btn-flat"><i class="fas fa-edit"></i></a> ';
+                        buttons += '<a type="button"  rel="delete" class="btn btn-danger btn-xs btn-flat"> <i class="fas fa-trash-alt"></i></a> '
+                        return buttons;
+                    }
+                },
+            ],
+            initComplete: function (settings, json) {
+
+            }
+
+
+        });
+
+        //funcion de editar y eliminar un detalle 
+        $('#tablaPost tbody')
+            .off('click', 'a[rel="edit"]')
+            .on('click', 'a[rel="edit"]', function () {
+                let tr = tablaPost.cell($(this).closest('td, li')).index();
+                let data = tablaPost.row(tr.row).data();
+
+                $('#action').val('edit');
+                $('#modaleadd').modal('show');
+
+                $('input[name="id"]').val(data.id);
+                $('input[name="first_name"]').val(data.first_name);
+                $('input[name="last_name"]').val(data.last_name);
+                $('input[name="username"]').val(data.username);
+                $('input[name="email"]').val(data.email);
+            })
+            .off('click', 'a[rel="delete"]')
+            .on('click', 'a[rel="delete"]', function () {
+                let tr = tablaPost.cell($(this).closest('td, li')).index();
+                let data = tablaPost.row(tr.row).data();
+
+                $('#action').val('delete');
+                $('#modaleadd').modal('show');
+
+                $('input[name="id"]').val(data.id);
+                $('input[name="first_name"]').val(data.first_name).attr('readonly', true);
+                $('input[name="last_name"]').val(data.last_name).attr('readonly', true);
+                $('input[name="username"]').val(data.username).attr('readonly', true);
+                $('input[name="email"]').val(data.email).attr('readonly', true);
+                $('input[name="password"]').attr('readonly', true);
+            });
+
+        //inicia la segunda tabla mysql
+
+        const tablaMysql = $('#tablaMysql').DataTable({
+            responsive: true,
+            autoWidth: false,
+            destroy: true,
+            deferRender: true,
+            ajax: {
+                url: window.location.pathname,
+                type: 'POST',
+                data: {
+                    'action': 'list_mysql',
+
+
+                },
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                dataSrc: ""
+            },
+            language: {
+                url: endPointTablaEspañol,
+            },
+            dom: 'Bfrtip',
+            columns: [{
+                "data": "first_name"
+            },
+            {
+                "data": "last_name"
+            },
+            {
+                "data": "username"
+            },
+            {
+                "data": "email"
+            },
+            {
+                "data": "id"
+            },
+
+            ],
+            columnDefs: [
+                {
+                    targets: [-1],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return data;
+
+                    }
+                },
+            ],
+            initComplete: function (settings, json) {
+
+            }
+
+
+        });
+
+    };
+
+
+    actulizarTabla();
+</script>
+{% endblock script %}
