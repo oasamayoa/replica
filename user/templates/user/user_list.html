@@ -160,14 +160,6 @@
             });
         });
 
-
-        // Botón para agregar
-        $('.btnaddson').on('click', function () {
-            $('#action').val('add');
-            $('#frmAdd')[0].reset();
-            $('#modaleadd').modal('show');
-        });
-
     });
 
     function actulizarTabla() {
@@ -231,37 +223,35 @@
 
         });
 
-        //funcion de editar y eliminar un detalle 
-        $('#tablaPost tbody')
-            .off('click', 'a[rel="edit"]')
-            .on('click', 'a[rel="edit"]', function () {
-                let tr = tablaPost.cell($(this).closest('td, li')).index();
-                let data = tablaPost.row(tr.row).data();
+        $('#tablaPost tbody').off('click', 'a[rel="edit"]').on('click', 'a[rel="edit"]', function () {
+            let tr = tablaPost.cell($(this).closest('td, li')).index();
+            let data = tablaPost.row(tr.row).data();
+            console.log(data);
+            $('#action').val('edit');
+            $('#modaleadd').modal('show');
 
-                $('#action').val('edit');
-                $('#modaleadd').modal('show');
+            $('input[name="id"]').val(data.id);
+            $('input[name="first_name"]').val(data.first_name);
+            $('input[name="last_name"]').val(data.last_name);
+            $('input[name="username"]').val(data.username);
+            $('input[name="email"]').val(data.email);
+        });
 
-                $('input[name="id"]').val(data.id);
-                $('input[name="first_name"]').val(data.first_name);
-                $('input[name="last_name"]').val(data.last_name);
-                $('input[name="username"]').val(data.username);
-                $('input[name="email"]').val(data.email);
-            })
-            .off('click', 'a[rel="delete"]')
-            .on('click', 'a[rel="delete"]', function () {
-                let tr = tablaPost.cell($(this).closest('td, li')).index();
-                let data = tablaPost.row(tr.row).data();
+        // Botón para eliminar
+        $('#tablaPost tbody').off('click', 'a[rel="delete"]').on('click', 'a[rel="delete"]', function () {
+            let tr = tablaPost.cell($(this).closest('td, li')).index();
+            let data = tablaPost.row(tr.row).data();
 
-                $('#action').val('delete');
-                $('#modaleadd').modal('show');
+            $('#action').val('delete');
+            $('#modaleadd').modal('show');
 
-                $('input[name="id"]').val(data.id);
-                $('input[name="first_name"]').val(data.first_name).attr('readonly', true);
-                $('input[name="last_name"]').val(data.last_name).attr('readonly', true);
-                $('input[name="username"]').val(data.username).attr('readonly', true);
-                $('input[name="email"]').val(data.email).attr('readonly', true);
-                $('input[name="password"]').attr('readonly', true);
-            });
+            $('input[name="id"]').val(data.id);
+            $('input[name="first_name"]').val(data.first_name).attr('readonly', true);
+            $('input[name="last_name"]').val(data.last_name).attr('readonly', true);
+            $('input[name="username"]').val(data.username).attr('readonly', true);
+            $('input[name="email"]').val(data.email).attr('readonly', true);
+            $('input[name="password"]').attr('readonly', true);
+        });
 
         //inicia la segunda tabla mysql
 
@@ -324,6 +314,22 @@
 
     };
 
+    $(function () {
+
+        // Botón para agregar
+        $('.btnaddson').on('click', function () {
+            $('#action').val('add');
+            $('#frmAdd')[0].reset();
+            $('#modaleadd').modal('show');
+        });
+
+        $('#modaleadd').on('hidden.bs.modal', function (e) {
+            $('#frmAdd').trigger('reset');
+            $('#frmAdd input').prop('readonly', false);  // quita readonly de todos los inputs
+            $('#action').val('');                        // limpia acción
+        });
+
+    });
 
     actulizarTabla();
 </script>

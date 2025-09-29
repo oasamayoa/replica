@@ -47,14 +47,30 @@ class Home(TemplateView):
             elif action == 'edit':
                 with transaction.atomic(): 
                     user = User.objects.get(pk=request.POST['id'])
+                    # username
+                    nuevo_username = request.POST['username']
+                    if user.username != nuevo_username:
+                        if User.objects.exclude(pk=user.pk).filter(username=nuevo_username).exists():
+                            raise Exception('El nombre de usuario ya existe.')
+                        user.username = nuevo_username  # solo actualiza si cambió y no hay conflicto
+
+                    # email
+                    nuevo_email = request.POST['email']
+                    if user.email != nuevo_email:
+                        if User.objects.exclude(pk=user.pk).filter(email=nuevo_email).exists():
+                            raise Exception('El correo ya existe.')
+                        user.email = nuevo_email  # solo actualiza si cambió y no hay conflicto
+
+                    # otros campos siempre se pueden actualizar
                     user.first_name = request.POST['first_name']
                     user.last_name = request.POST['last_name']
-                    user.email = request.POST['email']
-                    # si quieres editar password:
+
+                    # password si se cambio
                     if request.POST.get('password'):
                         user.set_password(request.POST['password'])
+
+                    # guardar en ambas bases
                     user.save()
-                    # data = {'success': True}
 
             elif action == 'delete':
                 with transaction.atomic():

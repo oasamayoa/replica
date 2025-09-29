@@ -1,4 +1,7 @@
 from django.db import models
+from django.conf import settings
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 
 
@@ -78,3 +81,51 @@ class User(AbstractUser):
 
             print("Error al eliminar usuario en MySQL:", e)
             raise e
+
+
+class Registro(models.Model):
+    ACCIONES = [
+        ('add', 'Agregar'),
+        ('edit', 'Editar'),
+        ('delete', 'Eliminar'),
+    ]
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    accion = models.CharField(max_length=10, choices=ACCIONES)
+    modelo = models.CharField(max_length=100)  # Ejemplo: "User"
+    objeto_id = models.CharField(max_length=100)  # ID del objeto afectado
+    descripcion = models.TextField(blank=True, null=True)  # Detalles opcionales
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.fecha} - {self.usuario} - {self.accion} - {self.modelo}"
+    
+# senales para los registros
+@receiver(post_save, sender=User)
+def registrar_guardado(sender, instance, created, using, **kwargs):
+    # Solo registrar desde la base principal para evitar duplicados
+    if using == 'default':
+        accion = 'add' if created else 'edit'
+        Registro.objects.create(
+            usuario=instance,
+            accion=accion,
+            modelo=sender.__name__,
+            objeto_id=instance.pk,
+            descripcion=f"Usuario {instance.username} {'creado' if created else 'editado'} en {using}"
+        )
+
+@receiver(post_delete, sender=User)
+def registrar_eliminado(sender, instance, using, **kwargs):
+    if using == 'default':
+        Registro.objects.create(
+            usuario=instance,
+            accion='delete',
+            modelo=sender.__name__,
+            objeto_id=instance.pk,
+            descripcion=f"Usuario {instance.username} eliminado en {using}"
+        )
