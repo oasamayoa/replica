@@ -18,11 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from user.views import Home
+from user.views import Selecion
 
 urlpatterns = [
-    path('', Home.as_view(), name='home'),
-    path('user/', include(('user.urls', 'user'), namespace='bases')),
+    path('', Selecion.as_view(), name='home'),
+    path('user/', include(('user.urls', 'user'), namespace='user')),
     path('admin/', admin.site.urls),
 ]
 

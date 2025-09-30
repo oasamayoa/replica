@@ -4,7 +4,7 @@
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-6">
+            <!-- <div class="col-6">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">BD PostgresSQL</h3>
@@ -33,12 +33,20 @@
                         </table>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
-            <div class="col-6">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">BD MySQL</h3>
+                        <div class="card-tools">
+                            <button class="btn btn-success btn-flat btnaddson" type="button">
+                                <i class="far fa-address-card nav-icon"> </i> Agregar
+                            </button>
+                            <a class="btn btn-success btn-flat" type="button" onclick="actulizarTabla()">
+                                <i class="fas fa-sync"></i> Sincronizar
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body">
                         <table id="tablaMysql" class="table table-bordered table-striped">
@@ -164,7 +172,7 @@
 
     function actulizarTabla() {
 
-        const tablaPost = $('#tablaPost').DataTable({
+        const tablaPost = $('#tablaMysql').DataTable({
             responsive: true,
             autoWidth: false,
             destroy: true,
@@ -173,7 +181,7 @@
                 url: window.location.pathname,
                 type: 'POST',
                 data: {
-                    'action': 'list_postgres',
+                    'action': 'list_mysql',
 
 
                 },
@@ -255,7 +263,7 @@
 
         //inicia la segunda tabla mysql
 
-        const tablaMysql = $('#tablaMysql').DataTable({
+        const tablaMysql = $('#tablaPost').DataTable({
             responsive: true,
             autoWidth: false,
             destroy: true,
@@ -264,7 +272,7 @@
                 url: window.location.pathname,
                 type: 'POST',
                 data: {
-                    'action': 'list_mysql',
+                    'action': 'list_postgres',
 
 
                 },
@@ -331,6 +339,6 @@
 
     });
 
-    actulizarTabla();
+    //actulizarTabla();
 </script>
 {% endblock script %}
