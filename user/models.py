@@ -16,6 +16,16 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, null=True, blank=True)
+    middle_name = models.CharField(max_length=200, null=True, blank=True)
+    dpi = models.CharField(max_length=13, unique=True, null=True, blank=True) 
+    second_last_name =  models.CharField(max_length=200, null=True, blank=True)
+    address = models.CharField(max_length=500, null=True, blank=True)
+    phone_home = models.PositiveIntegerField(null=True, blank=True)
+    phone_mobile = models.PositiveIntegerField(null=True, blank=True)
+    salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    bonus = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

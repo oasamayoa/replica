@@ -86,7 +86,12 @@
                     <input type="text" name="id" id="id" hidden>
                     <div class="row">
                         <div class="col-6 mb-2">
-                            <label>Nombre</label>
+                            <label>Primer nombre</label>
+                            <input type="text" name="first_name" id="first_name" class="form-control" required
+                                placeholder="Leonel Cristiano...">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Segundo nombre</label>
                             <input type="text" name="first_name" id="first_name" class="form-control" required
                                 placeholder="Leonel Cristiano...">
                         </div>
@@ -133,8 +138,9 @@
 
         // submit único, siempre activo
         $('#frmAdd').on('submit', function (e) {
-            e.preventDefault();
 
+            e.preventDefault();
+            $('#action').val('add');
             const parameters = new FormData(this);
 
             $.ajax({

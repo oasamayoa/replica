@@ -36,6 +36,7 @@ class ListPostgres(TemplateView):
                     })
             elif action == 'add':
                 with transaction.atomic():
+                    print(request.POST)
                     user = User(
                         username=request.POST['username'],
                         first_name=request.POST['first_name'],
@@ -76,9 +77,10 @@ class ListPostgres(TemplateView):
             elif action == 'delete':
                 with transaction.atomic():
                     user = User.objects.get(pk=request.POST['id'])
+                    print(user, 'delete')
                     if user:
-                        user.is_active = False
-                        user.save()
+                        # user.is_active = False
+                        user.delete()
                         # user.delete()
         except Exception as e:
             data['error'] = str(e)
@@ -162,9 +164,9 @@ class ListMysql(TemplateView):
                 with transaction.atomic():
                     user = User.objects.get(pk=request.POST['id'])
                     if user:
-                        user.is_active = False
-                        user.save()
-                        # user.delete()
+                        # user.is_active = False
+                        # user.save()
+                        user.delete()
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data, safe=False)

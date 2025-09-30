@@ -139,7 +139,7 @@
         // submit único, siempre activo
         $('#frmAdd').on('submit', function (e) {
             e.preventDefault();
-
+            $('#action').val('add');
             const parameters = new FormData(this);
 
             $.ajax({
