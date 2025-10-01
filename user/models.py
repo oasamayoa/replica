@@ -22,8 +22,8 @@ class User(AbstractUser):
     address = models.CharField(max_length=500, null=True, blank=True)
     phone_home = models.PositiveIntegerField(null=True, blank=True)
     phone_mobile = models.PositiveIntegerField(null=True, blank=True)
-    salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    bonus = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    salary = models.DecimalField(default=0, max_digits=10, decimal_places=2, null=True, blank=True)
+    bonus = models.DecimalField(default=0, max_digits=10, decimal_places=2, null=True, blank=True)
 
 
 
@@ -61,8 +61,9 @@ class User(AbstractUser):
         Eliminar en Postgres y MySQL con rollback en caso de fallo.
         """
         kwargs_copy = kwargs.copy()
+        user_id = self.id  # <- Guardamos el id ANTES de eliminar en Postgres
 
-        # Copia de los datos del objeto para rollback
+        # Copia de datos para rollback
         backup_data = {
             'id': self.id,
             'username': self.username,
@@ -77,20 +78,23 @@ class User(AbstractUser):
             kwargs_copy['using'] = 'default'
             super(User, self).delete(*args, **kwargs_copy)
 
-            # Eliminar en MySQL
-            kwargs_copy['using'] = 'mysql_replica'
-            super(User, self).delete(*args, **kwargs_copy)
+            # Eliminar en MySQL usando el id guardado
+            User.objects.using('mysql_replica').filter(id=user_id).delete()
 
         except Exception as e:
-            # Rollback en Postgres: reinsertar el usuario
+            # Rollback en Postgres: reinsertar o actualizar el usuario
             try:
                 kwargs_copy['using'] = 'default'
-                User.objects.using('default').create(**backup_data)
+                User.objects.using('default').update_or_create(
+                    id=backup_data['id'], defaults=backup_data
+                )
             except Exception as rollback_error:
                 print("Error al hacer rollback en Postgres:", rollback_error)
 
             print("Error al eliminar usuario en MySQL:", e)
             raise e
+
+
 
 
 class Registro(models.Model):
@@ -119,23 +123,19 @@ class Registro(models.Model):
 @receiver(post_save, sender=User)
 def registrar_guardado(sender, instance, created, using, **kwargs):
     # Solo registrar desde la base principal para evitar duplicados
-    if using == 'default':
-        accion = 'add' if created else 'edit'
-        Registro.objects.create(
-            usuario=instance,
-            accion=accion,
-            modelo=sender.__name__,
-            objeto_id=instance.pk,
-            descripcion=f"Usuario {instance.username} {'creado' if created else 'editado'} en {using}"
+    accion = 'add' if created else 'edit'
+    Registro.objects.create(
+        usuario=instance,
+        accion=accion,
+        modelo=sender.__name__,
+        objeto_id=instance.pk,
+        descripcion=f"Usuario {instance.username} {'creado' if created else 'editado'} en {using}"
         )
-
 @receiver(post_delete, sender=User)
 def registrar_eliminado(sender, instance, using, **kwargs):
-    if using == 'default':
-        Registro.objects.create(
-            usuario=instance,
+    Registro.objects.create(
             accion='delete',
             modelo=sender.__name__,
             objeto_id=instance.pk,
-            descripcion=f"Usuario {instance.username} eliminado en {using}"
+            descripcion=f"Usuario '{instance.username}' (ID {instance.pk}) eliminado en {using}"
         )

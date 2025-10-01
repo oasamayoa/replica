@@ -1,0 +1,97 @@
+{% extends 'base/home.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Bitacora</h3>
+                        <div class="card-tools">
+                            <a class="btn btn-success btn-flat" type="button" onclick="actulizarTabla()">
+                                <i class="fas fa-sync"></i> Sincronizar
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="tablaData" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Acción</th>
+                                    <th>Tabla BD</th>
+                                    <th>Descripcion</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+    
+    function actulizarTabla() {
+
+        const tablaPost = $('#tablaData').DataTable({
+            responsive: true,
+            autoWidth: false,
+            destroy: true,
+            deferRender: true,
+            ajax: {
+                url: window.location.pathname,
+                type: 'POST',
+                data: {
+                    'action': 'list_bitacora',
+
+
+                },
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                dataSrc: ""
+            },
+            language: {
+                url: endPointTablaEspañol,
+            },
+            dom: 'Bfrtip',
+            columns: [{
+                "data": "accion"
+            },
+            {
+                "data": "modelo"
+            },
+            {
+                "data": "descripccion"
+            },
+            {
+                "data": "fecha"
+            },
+            
+            ],
+            columnDefs: [
+                
+            ],
+            initComplete: function (settings, json) {
+
+            }
+
+
+        });
+
+
+    };
+
+
+</script>
+{% endblock script %}

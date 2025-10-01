@@ -21,11 +21,15 @@
                         <table id="tablaPost" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>nombre</th>
-                                    <th>apellido</th>
-                                    <th>Usuario</th>
-                                    <th>Email</th>
-                                    <th>id</th>
+                                    <th>Nombres</th>
+                                    <th>Apellidos</th>
+                                    <th>DPI</th>
+                                    <th>Dirección</th>
+                                    <th>Tel. casa</th>
+                                    <th>Celular</th>
+                                    <th>Salario</th>
+                                    <th>Bonos</th>
+                                    <th>Opciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -37,32 +41,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- <div class="col-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">BD MySQL</h3>
-                    </div>
-                    <div class="card-body">
-                        <table id="tablaMysql" class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>nombre</th>
-                                    <th>apellido</th>
-                                    <th>Usuario</th>
-                                    <th>Email</th>
-                                    <th>id</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div> -->
         </div>
     </div>
 </div>
@@ -88,22 +66,57 @@
                         <div class="col-6 mb-2">
                             <label>Primer nombre</label>
                             <input type="text" name="first_name" id="first_name" class="form-control" required
-                                placeholder="Leonel Cristiano...">
+                                placeholder="Leonel...">
                         </div>
                         <div class="col-6 mb-2">
                             <label>Segundo nombre</label>
-                            <input type="text" name="first_name" id="first_name" class="form-control" required
-                                placeholder="Leonel Cristiano...">
+                            <input type="text" name="middle_name" id="middle_name" class="form-control" required
+                                placeholder="Cristiano...">
                         </div>
                         <div class="col-6 mb-2">
-                            <label>Apellido</label>
+                            <label>Primer apellido</label>
                             <input type="text" name="last_name" id="last_name" class="form-control" required
+                                placeholder="Duda Kunde...">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Segundo apellido</label>
+                            <input type="text" name="second_last_name" id="second_last_name" class="form-control" required
+                                placeholder="Duda Kunde...">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>DPI</label>
+                            <input type="text" name="dpi" id="dpi" class="form-control" required
                                 placeholder="Duda Kunde...">
                         </div>
                         <div class="col-6 mb-2">
                             <label>Usuario</label>
                             <input type="text" name="username" id="username" class="form-control" required
                                 placeholder="lacabra">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Dirección</label>
+                            <input type="text" name="address" id="address" class="form-control" required
+                                placeholder="Duda Kunde...">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Telefono casa</label>
+                            <input type="number" name="phone_home" id="phone_home" class="form-control" required
+                                placeholder="12345678">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Celular</label>
+                            <input type="number" name="phone_mobile" id="phone_mobile" class="form-control" required
+                                placeholder="12345678">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Salario</label>
+                            <input type="number" name="salary" id="salary" class="form-control" required
+                                placeholder="0.00">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label>Bono</label>
+                            <input type="text" name="bonus" id="bonus" class="form-control" required
+                                placeholder="0.00">
                         </div>
 
                         <div class="col-6 mb-2">
@@ -140,7 +153,6 @@
         $('#frmAdd').on('submit', function (e) {
 
             e.preventDefault();
-            $('#action').val('add');
             const parameters = new FormData(this);
 
             $.ajax({
@@ -158,8 +170,7 @@
                         return false;
                     } else {
                         $('#modaleadd').modal('hide');
-                        $('#tablaMysql').DataTable().ajax.reload(null, false);
-                        $('#tablaPost').DataTable().ajax.reload(null, false);
+                        actulizarTabla();
                         toastr.success('Acción realizada correctamente.');
                     }
                 },
@@ -196,16 +207,28 @@
             },
             dom: 'Bfrtip',
             columns: [{
-                "data": "first_name"
+                "data": "nombre_completo"
             },
             {
-                "data": "last_name"
+                "data": "apellido_completo"
             },
             {
-                "data": "username"
+                "data": "dpi"
             },
             {
-                "data": "email"
+                "data": "address"
+            },
+            {
+                "data": "phone_home"
+            },
+            {
+                "data": "phone_mobile"
+            },
+            {
+                "data": "salary"
+            },
+            {
+                "data": "bonus"
             },
             {
                 "data": "id"
@@ -235,7 +258,6 @@
         $('#tablaPost tbody').off('click', 'a[rel="edit"]').on('click', 'a[rel="edit"]', function () {
             let tr = tablaPost.cell($(this).closest('td, li')).index();
             let data = tablaPost.row(tr.row).data();
-            console.log(data);
             $('#action').val('edit');
             $('#modaleadd').modal('show');
 
@@ -244,6 +266,14 @@
             $('input[name="last_name"]').val(data.last_name);
             $('input[name="username"]').val(data.username);
             $('input[name="email"]').val(data.email);
+            $('input[name="middle_name"]').val(data.middle_name);
+            $('input[name="dpi"]').val(data.dpi);
+            $('input[name="second_last_name"]').val(data.second_last_name);
+            $('input[name="address"]').val(data.address);
+            $('input[name="phone_home"]').val(data.phone_home);
+            $('input[name="phone_mobile"]').val(data.phone_mobile);
+            $('input[name="salary"]').val(data.salary);
+            $('input[name="bonus"]').val(data.bonus);
         });
 
         // Botón para eliminar
@@ -260,66 +290,19 @@
             $('input[name="username"]').val(data.username).attr('readonly', true);
             $('input[name="email"]').val(data.email).attr('readonly', true);
             $('input[name="password"]').attr('readonly', true);
+            $('input[name="middle_name"]').val(data.middle_name).attr('readonly', true);
+            $('input[name="dpi"]').val(data.dpi).attr('readonly', true);
+            $('input[name="second_last_name"]').val(data.second_last_name).attr('readonly', true);
+            $('input[name="address"]').val(data.address).attr('readonly', true);
+            $('input[name="phone_home"]').val(data.phone_home).attr('readonly', true);
+            $('input[name="phone_mobile"]').val(data.phone_mobile).attr('readonly', true);
+            $('input[name="salary"]').val(data.salary).attr('readonly', true);
+            $('input[name="bonus"]').val(data.bonus).attr('readonly', true);
         });
 
         //inicia la segunda tabla mysql
 
-        const tablaMysql = $('#tablaMysql').DataTable({
-            responsive: true,
-            autoWidth: false,
-            destroy: true,
-            deferRender: true,
-            ajax: {
-                url: window.location.pathname,
-                type: 'POST',
-                data: {
-                    'action': 'list_mysql',
-
-
-                },
-                headers: {
-                    'X-CSRFToken': csrftoken
-                },
-                dataSrc: ""
-            },
-            language: {
-                url: endPointTablaEspañol,
-            },
-            dom: 'Bfrtip',
-            columns: [{
-                "data": "first_name"
-            },
-            {
-                "data": "last_name"
-            },
-            {
-                "data": "username"
-            },
-            {
-                "data": "email"
-            },
-            {
-                "data": "id"
-            },
-
-            ],
-            columnDefs: [
-                {
-                    targets: [-1],
-                    class: 'text-center',
-                    orderable: false,
-                    render: function (data, type, row) {
-                        return data;
-
-                    }
-                },
-            ],
-            initComplete: function (settings, json) {
-
-            }
-
-
-        });
+        
 
     };
 
@@ -327,8 +310,8 @@
 
         // Botón para agregar
         $('.btnaddson').on('click', function () {
-            $('#action').val('add');
             $('#frmAdd')[0].reset();
+            $('#action').val('add');
             $('#modaleadd').modal('show');
         });
 

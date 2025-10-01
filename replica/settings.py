@@ -82,7 +82,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': '123',
         'HOST': 'localhost',
-        'PORT': '5432',
+        'PORT': '5433',
     },
     'mysql_replica': {  # MySQL (secundaria)
         'ENGINE': 'django.db.backends.mysql',
